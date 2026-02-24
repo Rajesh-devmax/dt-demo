@@ -8,11 +8,11 @@ export default function App() {
   const [selected, setSelected] = useState<any | null>(null);
   const [statusByAsset, setStatusByAsset] = useState<Record<string, any>>({});
   const [alerts, setAlerts] = useState<any[]>([]);
+  const apiBase = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
   useEffect(() => {
-    const apiBase = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
     fetch(`${apiBase}/api/assets`).then(r => r.json()).then(setAssets);
-  }, []);
+  }, [apiBase]);
 
   useEffect(() => {
     const sse = connectSSE((msg: any) => {
@@ -28,6 +28,14 @@ export default function App() {
       sse.close();
     };
   }, []);
+
+  const triggerAlarm = async (payload: { code: string; severity: string; assetId: string; msg: string }) => {
+    await fetch(`${apiBase}/api/alarms`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  };
 
   const selectedLive = selected ? statusByAsset[selected.id] : null;
 
@@ -61,6 +69,59 @@ export default function App() {
 
         <div style={{ background: "#ffffff", borderRadius: 16, padding: 16, boxShadow: "0 10px 24px rgba(15, 23, 42, 0.08)" }}>
           <h3 style={{ marginTop: 0, marginBottom: 12 }}>Live Alerts</h3>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+            <button
+              onClick={() => triggerAlarm({
+                code: "TEMP_DRIFT",
+                severity: "MED",
+                assetId: "OVEN-01",
+                msg: "Oven temperature out of band",
+              })}
+              style={{
+                padding: "6px 10px",
+                borderRadius: 8,
+                border: "1px solid #f59e0b",
+                background: "#fff7ed",
+                cursor: "pointer",
+              }}
+            >
+              Trigger Overheat
+            </button>
+            <button
+              onClick={() => triggerAlarm({
+                code: "VIB_HIGH",
+                severity: "HIGH",
+                assetId: "CNC-01",
+                msg: "Excessive vibration detected",
+              })}
+              style={{
+                padding: "6px 10px",
+                borderRadius: 8,
+                border: "1px solid #ef4444",
+                background: "#fef2f2",
+                cursor: "pointer",
+              }}
+            >
+              Trigger Vibration Alarm
+            </button>
+            <button
+              onClick={() => triggerAlarm({
+                code: "ENERGY_SPIKE",
+                severity: "MED",
+                assetId: "CONV-01",
+                msg: "Power consumption spike",
+              })}
+              style={{
+                padding: "6px 10px",
+                borderRadius: 8,
+                border: "1px solid #6366f1",
+                background: "#eef2ff",
+                cursor: "pointer",
+              }}
+            >
+              Trigger Energy Spike
+            </button>
+          </div>
           <div style={{ maxHeight: 200, overflow: "auto" }}>
             {alerts.map((a, i) => (
               <div key={i} style={{ padding: "8px 0", borderBottom: "1px solid #edf0f5" }}>
