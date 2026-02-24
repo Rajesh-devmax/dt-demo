@@ -1,5 +1,3 @@
-import { WebSocketServer } from "ws";
-
 type AssetState = "RUNNING" | "IDLE" | "DOWN" | "DEGRADED";
 
 type Telemetry = {
@@ -40,7 +38,9 @@ function pickState(prev: AssetState): AssetState {
   return "DOWN";
 }
 
-export function startSimulator(wss: WebSocketServer) {
+type TelemetryListener = (payload: string) => void;
+
+export function startSimulator(emit: TelemetryListener) {
   const stateByAsset: Record<string, AssetState> = {};
   const drift: Record<string, number> = {};
 
@@ -96,10 +96,7 @@ export function startSimulator(wss: WebSocketServer) {
       };
 
       const payload = JSON.stringify({ type: "telemetry", data: msg });
-
-      for (const client of wss.clients) {
-        if (client.readyState === 1) client.send(payload);
-      }
+      emit(payload);
 
       // Alerts
       const alerts: any[] = [];
@@ -115,9 +112,7 @@ export function startSimulator(wss: WebSocketServer) {
 
       for (const al of alerts) {
         const ap = JSON.stringify({ type: "alert", data: { ...al, ts: Date.now() } });
-        for (const client of wss.clients) {
-          if (client.readyState === 1) client.send(ap);
-        }
+        emit(ap);
       }
     }
   }, 1000);

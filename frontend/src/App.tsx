@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { connectWS } from "./ws";
+import { connectSSE } from "./ws";
 import { AssetPanel } from "./components/AssetPanel";
 import { Factory3DEnhanced } from "./components/Factory3DEnhanced";
 
@@ -10,11 +10,12 @@ export default function App() {
   const [alerts, setAlerts] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/assets").then(r => r.json()).then(setAssets);
+    const apiBase = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+    fetch(`${apiBase}/api/assets`).then(r => r.json()).then(setAssets);
   }, []);
 
   useEffect(() => {
-    const ws = connectWS((msg) => {
+    const sse = connectSSE((msg: any) => {
       if (msg.type === "telemetry") {
         const t = msg.data;
         setStatusByAsset(prev => ({ ...prev, [t.assetId]: t }));
@@ -23,7 +24,9 @@ export default function App() {
         setAlerts(prev => [msg.data, ...prev].slice(0, 20));
       }
     });
-    return () => ws.close();
+    return () => {
+      sse.close();
+    };
   }, []);
 
   const selectedLive = selected ? statusByAsset[selected.id] : null;
