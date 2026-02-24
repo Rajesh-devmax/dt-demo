@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { connectWS } from "./ws";
-import { FactoryMap } from "./components/FactoryMap";
 import { AssetPanel } from "./components/AssetPanel";
-import { Factory3DProcedural } from "./components/Factory3DProcedural";
 import { Factory3DEnhanced } from "./components/Factory3DEnhanced";
 
 export default function App() {

@@ -1,5 +1,3 @@
-import React from "react";
-
 export function FactoryMap({ assets, statusByAsset, selected, onSelect }: any) {
   return (
     <svg width="700" height="380" style={{ border: "1px solid #ddd", background: "#fafafa" }}>

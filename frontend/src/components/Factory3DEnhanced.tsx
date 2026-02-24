@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { RefObject } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
@@ -60,26 +61,6 @@ function CameraRig({ preset }: { preset: PresetKey }) {
   });
 
   return null;
-}
-
-function Zone({ pos, size, label }: { pos: [number, number, number]; size: [number, number, number]; label: string }) {
-  return (
-    <group position={pos}>
-      <mesh receiveShadow>
-        <boxGeometry args={size} />
-        <meshStandardMaterial color="#ffffff" />
-      </mesh>
-      <mesh position={[0, size[1] / 2 + 0.02, 0]} receiveShadow>
-        <boxGeometry args={[size[0] * 0.92, 0.02, size[2] * 0.92]} />
-        <meshStandardMaterial color="#e9edf2" />
-      </mesh>
-      <Html position={[0, size[1] / 2 + 0.05, 0]} distanceFactor={10}>
-        <div style={{ fontSize: 12, padding: "2px 6px", background: "rgba(255,255,255,0.85)", border: "1px solid #ddd" }}>
-          <b>{label}</b>
-        </div>
-      </Html>
-    </group>
-  );
 }
 
 function ZoneLabel({ pos, label }: { pos: [number, number, number]; label: string }) {
@@ -389,14 +370,12 @@ function FloorDetails() {
 function MovingParts({
   running,
   length = 1.2,
-  width = 0.35,
   count = 4,
   speed = 0.35,
   direction = "x",
 }: {
   running: boolean;
   length?: number;
-  width?: number;
   count?: number;
   speed?: number;
   direction?: "x" | "z";
@@ -404,7 +383,7 @@ function MovingParts({
   const group = useRef<THREE.Group>(null!);
   const offsets = useMemo(() => Array.from({ length: count }, (_, i) => i / count), [count]);
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     if (!group.current) return;
     const t = state.clock.getElapsedTime();
     group.current.children.forEach((child, i) => {
@@ -804,7 +783,7 @@ function ControlsAndRig({ preset }: { preset: PresetKey }) {
   );
 }
 
-function ExposeControls({ controlsRef }: { controlsRef: React.RefObject<any> }) {
+function ExposeControls({ controlsRef }: { controlsRef: RefObject<any> }) {
   const three = useThree() as any;
   useEffect(() => {
     three.controls = controlsRef.current;

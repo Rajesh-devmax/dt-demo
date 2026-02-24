@@ -1,5 +1,3 @@
-import React from "react";
-
 export function AssetPanel({ asset, live }: any) {
   if (!asset) return <div style={{ padding: 12 }}>Select an asset on the map.</div>;
   const t = live?.metrics || {};
